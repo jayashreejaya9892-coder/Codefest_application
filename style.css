@@ -59,16 +59,11 @@ h2 { font-size:1.35rem; } h3 { font-size:1.05rem; }
 .chart-panel {
   position: relative;
   min-width: 0;
-  height: 360px;
-  padding: 20px;
+  height: 400px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 18px;
-  background: #131b2e;
 }
 
 .chart-panel canvas {
-  display: block;
   width: 100% !important;
   height: 260px !important;
 }
