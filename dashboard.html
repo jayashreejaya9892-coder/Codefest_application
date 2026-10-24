@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+  body { background: navy !important; color: white !important; }
+  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OlympicLens | Olympic Analytics</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <a href="index.html">← Back to Home</a>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark">OL</div>
+    <div><h1>OlympicLens</h1><p>Smart Olympic Analytics & Prediction</p></div>
+    <span class="demo-badge">MVP DEMO DATA</span>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">DATA • DISCOVER • PREDICT</p>
+        <h2>See the story behind the medals.</h2>
+        <p>Explore Olympic performance, compare countries, and discover trends across Games.</p>
+      </div>
+    </section>
+
+    <section class="filters panel">
+      <label>Olympic year
+        <select id="yearFilter">
+          <option value="all">All years</option>
+          <option value="2008">2008</option>
+          <option value="2012">2012</option>
+          <option value="2016">2016</option>
+          <option value="2020">2020</option>
+          <option value="2024">2024</option>
+        </select>
+      </label>
+      <label>Country
+        <select id="countryFilter">
+          <option value="all">All countries</option>
+          <option>United States</option><option>China</option><option>Great Britain</option>
+          <option>Japan</option><option>India</option>
+        </select>
+      </label>
+      <label>Sport
+        <select id="sportFilter">
+          <option value="all">All sports</option>
+          <option>Athletics</option><option>Swimming</option><option>Gymnastics</option>
+          <option>Wrestling</option><option>Badminton</option>
+        </select>
+      </label>
+      <button id="resetBtn" class="secondary">Reset filters</button>
+
+    </section>
+    <section class="stats-grid">
+      <article class="stat-card"><span>Gold medals</span><strong id="goldKpi">—</strong><small>    Current selection</small></article>
+      <article class="stat-card"><span>Silver medals</span><strong id="silverKpi">—</strong><small>   Current selection</small></article>
+      <article class="stat-card"><span>Bronze medals</span><strong id="bronzeKpi">—</strong><small>   Current selection</small></article>
+      <article class="stat-card accent"><span>Total medals</span><strong id="totalKpi">—</strong><small>   Current selection</small></article>
+    </section>
+
+    <section class="chart-grid">
+      <article class="panel chart-panel"><div class="panel-heading"><div><h3>Country comparison</h3><p>Total medals by country</p></div></div><canvas id="countryChart"></canvas></article>
+      <article class="panel chart-panel"><div class="panel-heading"><div><h3>Performance over time</h3><p>Medals across Olympic editions</p></div></div><canvas id="trendChart"></canvas></article>
+      <article class="panel chart-panel"><div class="panel-heading"><div><h3>Sport-wise performance</h3><p>Medals by sport</p></div></div><canvas id="sportChart"></canvas></article>
+      <article class="panel chart-panel prediction"><div class="panel-heading"><div><h3>Next Games estimate</h3><p>Simple baseline forecast</p></div><span class="tag">DEMO</span></div>
+        <div id="predictionList" class="prediction-list"></div>
+        <p class="small-note">.</p>
+      </article>
+    </section>
+
+    <section class="panel table-panel">
+      <div class="panel-heading"><div><h3>Medal summary</h3></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Country</th><th>Gold</th><th>Silver</th><th>Bronze</th><th>Total</th></tr></thead><tbody id="medalTable"></tbody></table></div>
+    </section>
+    <footer>OlympicLens • CodeFest 2026 • Student project prototype</footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
+ 

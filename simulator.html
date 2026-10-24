@@ -1,0 +1,415 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OlympicLens | Medal Simulator</title>
+  <a href="index.html">← Back to Home</a>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+    }
+
+    h1 {
+      text-align: center;
+      color: #38bdf8;
+    }
+
+    .intro {
+      text-align: center;
+      color: #cbd5e1;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 25px auto;
+    }
+
+    .countries {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .panel, .results {
+      padding: 22px;
+      background: #1e293b;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      min-width: 0;
+    }
+
+    h2 { color: #7dd3fc; }
+
+    label {
+      display: block;
+      margin: 18px 0 8px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      background: #334155;
+      border: 1px solid #64748b;
+      border-radius: 7px;
+      color: white;
+      font-size: 16px;
+    }
+
+    .total {
+      font-size: 26px;
+      font-weight: bold;
+      margin-top: 18px;
+    }
+
+    .results { text-align: center; }
+
+    .winner {
+      color: #4ade80;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    button {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 8px;
+      background: #38bdf8;
+      color: #0f172a;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 8px 4px;
+    }
+
+    a { color: #38bdf8; }
+
+    .note {
+      color: #cbd5e1;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      .countries { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🏅 Olympic Medal Simulator</h1>
+  <p class="intro">
+    Select countries, explore their recorded medals, and simulate new results.
+  </p>
+
+  <main class="container">
+    <p id="status" class="intro">Loading countries from your dataset...</p>
+
+    <div class="countries">
+      <section class="panel">
+        <h2>🌍 Country A</h2>
+
+        <label for="countryA">Select country</label>
+        <select id="countryA" disabled>
+          <option>Loading countries...</option>
+        </select>
+
+        <label for="goldA">Gold medals</label>
+        <input id="goldA" type="number" min="0" step="1" value="0" disabled>
+
+        <label for="silverA">Silver medals</label>
+        <input id="silverA" type="number" min="0" step="1" value="0" disabled>
+
+        <label for="bronzeA">Bronze medals</label>
+        <input id="bronzeA" type="number" min="0" step="1" value="0" disabled>
+
+        <div class="total">Total: <span id="totalA">0</span></div>
+      </section>
+
+      <section class="panel">
+        <h2>🌍 Country B</h2>
+
+        <label for="countryB">Select country</label>
+        <select id="countryB" disabled>
+          <option>Loading countries...</option>
+        </select>
+
+        <label for="goldB">Gold medals</label>
+        <input id="goldB" type="number" min="0" step="1" value="0" disabled>
+
+        <label for="silverB">Silver medals</label>
+        <input id="silverB" type="number" min="0" step="1" value="0" disabled>
+
+        <label for="bronzeB">Bronze medals</label>
+        <input id="bronzeB" type="number" min="0" step="1" value="0" disabled>
+
+        <div class="total">Total: <span id="totalB">0</span></div>
+      </section>
+    </div>
+
+    <section class="results">
+      <h2>🏆 Simulation Results</h2>
+      <p id="winner" class="winner" aria-live="polite">
+        Select two countries to begin.
+      </p>
+      <p id="summary"></p>
+
+      <button id="resetButton" disabled>Reset to Dataset Counts</button>
+
+      <p class="note">
+        The starting values come from medal records in your CSV.
+        You can edit the numbers to test hypothetical scenarios.
+        Results depend on the accuracy and coverage of the dataset.
+      </p>
+    </section>
+
+    <p><a href="index.html">← Back to OlympicLens Dashboard</a></p>
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+
+    let medalData = {};
+    let countries = [];
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let value = "";
+      let quoted = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+
+        if (ch === '"' && quoted && text[i + 1] === '"') {
+          value += '"';
+          i++;
+        } else if (ch === '"') {
+          quoted = !quoted;
+        } else if (ch === "," && !quoted) {
+          row.push(value.trim());
+          value = "";
+        } else if ((ch === "\n" || ch === "\r") && !quoted) {
+          if (ch === "\r" && text[i + 1] === "\n") i++;
+          row.push(value.trim());
+
+          if (row.some(cell => cell !== "")) rows.push(row);
+
+          row = [];
+          value = "";
+        } else {
+          value += ch;
+        }
+      }
+
+      if (value.length || row.length) {
+        row.push(value.trim());
+        if (row.some(cell => cell !== "")) rows.push(row);
+      }
+
+      return rows;
+    }
+
+    function addCountryOptions() {
+      for (const id of ["countryA", "countryB"]) {
+        const select = $(id);
+        select.innerHTML = "";
+
+        countries.forEach(country => {
+          const option = document.createElement("option");
+          option.value = country;
+          option.textContent = country;
+          select.appendChild(option);
+        });
+      }
+
+      if (countries.length > 1) {
+        $("countryA").value = countries.includes("India")
+          ? "India" : countries[0];
+
+        $("countryB").value = countries.includes("USA")
+          ? "USA" : countries.find(c => c !== $("countryA").value);
+      }
+
+      for (const id of [
+        "countryA", "countryB",
+        "goldA", "silverA", "bronzeA",
+        "goldB", "silverB", "bronzeB"
+      ]) {
+        $(id).disabled = false;
+      }
+
+      $("resetButton").disabled = false;
+    }
+
+    function loadCountryCounts(country, suffix) {
+      const data = medalData[country] || {
+        gold: 0, silver: 0, bronze: 0
+      };
+
+      $("gold" + suffix).value = data.gold;
+      $("silver" + suffix).value = data.silver;
+      $("bronze" + suffix).value = data.bronze;
+
+      simulate();
+    }
+
+    function getCount(id) {
+      const input = $(id);
+      const value = input.valueAsNumber;
+
+      if (input.value.trim() === "" || !Number.isFinite(value)) {
+        return 0;
+      }
+
+      return Math.max(0, Math.min(1000000, Math.floor(value)));
+    }
+
+    function simulate() {
+      const nameA = $("countryA").value || "Country A";
+      const nameB = $("countryB").value || "Country B";
+
+      const a = getCount("goldA") +
+                getCount("silverA") +
+                getCount("bronzeA");
+
+      const b = getCount("goldB") +
+                getCount("silverB") +
+                getCount("bronzeB");
+
+      $("totalA").textContent = a.toLocaleString();
+      $("totalB").textContent = b.toLocaleString();
+
+      if (nameA === nameB) {
+        $("winner").textContent = "Choose two different countries.";
+      } else if (a > b) {
+        $("winner").textContent = nameA + " leads in this scenario!";
+      } else if (b > a) {
+        $("winner").textContent = nameB + " leads in this scenario!";
+      } else {
+        $("winner").textContent = "It's a tie in total medals!";
+      }
+
+      $("summary").textContent =
+        `${nameA}: ${a.toLocaleString()} medals | ` +
+        `${nameB}: ${b.toLocaleString()} medals`;
+    }
+
+    function resetCounts() {
+      loadCountryCounts($("countryA").value, "A");
+      loadCountryCounts($("countryB").value, "B");
+    }
+
+    async function init() {
+      try {
+        const response = await fetch("data/all_olympic_medalists.csv");
+
+        if (!response.ok) {
+          throw new Error(
+            "CSV not found. Check that data/all_olympic_medalists.csv exists."
+          );
+        }
+
+        const text = await response.text();
+        const rows = parseCSV(text);
+
+        if (rows.length < 2) {
+          throw new Error("The CSV file is empty or has no data rows.");
+        }
+
+        const headers = rows[0].map(h =>
+          h.replace(/^\uFEFF/, "").trim().toLowerCase()
+        );
+
+        const countryIndex = headers.indexOf("country");
+        const medalIndex = headers.indexOf("medal");
+
+        if (countryIndex < 0 || medalIndex < 0) {
+          throw new Error("CSV needs columns named country and medal.");
+        }
+
+        // Count medal records by country and medal type.
+        // Duplicate rows are excluded using all available event identifiers.
+        const seen = new Set();
+
+        for (const row of rows.slice(1)) {
+          const country = (row[countryIndex] || "").trim();
+          const medal = (row[medalIndex] || "").trim().toLowerCase();
+
+          if (!country || !["gold", "silver", "bronze"].includes(medal)) {
+            continue;
+          }
+
+          const get = name => {
+            const index = headers.indexOf(name);
+            return index < 0 ? "" : (row[index] || "").trim();
+          };
+
+          const keyParts = [
+            get("year"),
+            get("season"),
+            country,
+            medal,
+            get("sport"),
+            get("event_name")
+          ];
+
+          const key = keyParts.join("|");
+
+          if (seen.has(key)) continue;
+          seen.add(key);
+
+          if (!medalData[country]) {
+            medalData[country] = { gold: 0, silver: 0, bronze: 0 };
+          }
+
+          medalData[country][medal]++;
+        }
+
+        countries = Object.keys(medalData).sort((a, b) =>
+          a.localeCompare(b)
+        );
+
+        if (countries.length < 2) {
+          throw new Error("The dataset needs at least two countries with medal records.");
+        }
+
+        addCountryOptions();
+
+        $("countryA").addEventListener("change", () =>
+          loadCountryCounts($("countryA").value, "A")
+        );
+
+        $("countryB").addEventListener("change", () =>
+          loadCountryCounts($("countryB").value, "B")
+        );
+
+        for (const id of [
+          "goldA", "silverA", "bronzeA",
+          "goldB", "silverB", "bronzeB"
+        ]) {
+          $(id).addEventListener("input", simulate);
+        }
+
+        $("resetButton").addEventListener("click", resetCounts);
+
+        $("status").textContent =
+          `Loaded ${countries.length} countries from your CSV dataset.`;
+
+        resetCounts();
+
+      } catch (error) {
+        $("status").textContent = error.message;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

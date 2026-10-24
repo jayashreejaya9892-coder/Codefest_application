@@ -104,3 +104,21 @@ hr { border:0; border-top:1px solid var(--border); }
   .filters, .filter-bar, .controls { padding:12px; }
   .card, .kpi, .stat-card, .chart-card, .panel { padding:16px; }
 }
+
+.compare-button,timeline-button,quiz-button {
+  display: inline-block;
+  padding: 12px 20px;
+  margin: 10px 0;
+  background: #38bdf8;
+  color: #0f172a;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+.compare-button,timeline-button,quiz-button:hover {
+  background: #7dd3fc;
+  transform: translateY(-2px);
+}
+

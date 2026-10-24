@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OlympicLens | History Timeline</title>
+  <a href="index.html">← Back to Home</a>
+  <style>
+    body {
+      margin: 0;
+      padding: 25px;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+    }
+
+    h1 {
+      color: #38bdf8;
+      text-align: center;
+    }
+
+    p {
+      text-align: center;
+      color: #cbd5e1;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 25px 0;
+      flex-wrap: wrap;
+    }
+
+    select, button {
+      padding: 12px;
+      border: 0;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    button {
+      background: #38bdf8;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .timeline {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .event {
+      background: #1e293b;
+      border-left: 4px solid #38bdf8;
+      border-radius: 8px;
+      padding: 18px;
+      margin: 18px 0;
+    }
+
+    .event h2 {
+      color: #38bdf8;
+      margin-top: 0;
+    }
+
+    .stats {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      flex: 1;
+      min-width: 110px;
+      background: #334155;
+      padding: 14px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    a {
+      color: #38bdf8;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🏅 Olympic History Timeline</h1>
+  <p>Explore Olympic Games using the medalist dataset.</p>
+
+  <div class="controls">
+    <select id="season">
+      <option value="All">All seasons</option>
+      <option value="Summer">Summer</option>
+      <option value="Winter">Winter</option>
+    </select>
+
+    <button onclick="loadTimeline()">Explore History</button>
+    <a href="index.html">Back to Dashboard</a>
+  </div>
+
+  <div id="timeline" class="timeline">
+    <p>Loading Olympic history...</p>
+  </div>
+
+  <script>
+    async function loadTimeline() {
+      const container = document.getElementById("timeline");
+      const selectedSeason = document.getElementById("season").value;
+
+      container.innerHTML = "<p>Loading data...</p>";
+
+      try {
+        const response = await fetch("data/all_olympic_medalists.csv");
+
+        if (!response.ok) {
+          throw new Error("CSV file not found. Check the data folder and filename.");
+        }
+
+        const csv = await response.text();
+        const lines = csv.trim().split(/\r?\n/);
+
+        function parseLine(line) {
+          const result = [];
+          let value = "";
+          let quoted = false;
+
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+
+            if (char === '"' && line[i + 1] === '"' && quoted) {
+              value += '"';
+              i++;
+            } else if (char === '"') {
+              quoted = !quoted;
+            } else if (char === "," && !quoted) {
+              result.push(value.trim());
+              value = "";
+            } else {
+              value += char;
+            }
+          }
+
+          result.push(value.trim());
+          return result;
+        }
+
+        const headers = parseLine(lines[0]).map(h =>
+          h.replace(/^\uFEFF/, "").trim().toLowerCase()
+        );
+
+        const yearIndex = headers.indexOf("year");
+        const seasonIndex = headers.indexOf("season");
+        const countryIndex = headers.indexOf("country");
+        const medalIndex = headers.indexOf("medal");
+
+        if ([yearIndex, seasonIndex, countryIndex, medalIndex].includes(-1)) {
+          throw new Error("The CSV must contain year, season, country and medal columns.");
+        }
+
+        const games = {};
+
+        for (const line of lines.slice(1)) {
+          if (!line.trim()) continue;
+
+          const row = parseLine(line);
+          const year = row[yearIndex];
+          const season = row[seasonIndex];
+          const country = row[countryIndex];
+          const medal = (row[medalIndex] || "").toLowerCase();
+
+          if (!year || !season || !country) continue;
+          if (!["gold", "silver", "bronze"].includes(medal)) continue;
+          if (selectedSeason !== "All" &&
+              season.toLowerCase() !== selectedSeason.toLowerCase()) continue;
+
+          const key = `${year}-${season}`;
+
+          if (!games[key]) {
+            games[key] = {
+              year,
+              season,
+              countries: new Set(),
+              medals: 0
+            };
+          }
+
+          games[key].countries.add(country);
+          games[key].medals++;
+        }
+
+        const sortedGames = Object.values(games).sort(
+          (a, b) => Number(b.year) - Number(a.year)
+        );
+
+        if (sortedGames.length === 0) {
+          container.innerHTML = "<p>No Olympic Games found for this season.</p>";
+          return;
+        }
+
+        container.innerHTML = sortedGames.map(game => `
+          <div class="event">
+            <h2>${game.year} — ${game.season} Olympics</h2>
+            <div class="stats">
+              <div class="stat">
+                <strong>${game.countries.size}</strong>
+                Countries or teams
+              </div>
+              <div class="stat">
+                <strong>${game.medals.toLocaleString()}</strong>
+                Medalist records
+              </div>
+            </div>
+          </div>
+        `).join("");
+
+      } catch (error) {
+        container.innerHTML = `<p>${error.message}</p>`;
+      }
+    }
+
+    loadTimeline();
+  </script>
+</body>
+</html>

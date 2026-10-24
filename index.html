@@ -1,84 +1,134 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <style>
-  body { background: navy !important; color: white !important; }
-  </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OlympicLens | Olympic Analytics</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>OlympicLens | Home</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 30px 20px;
+      font-family: Arial, sans-serif;
+      background: #0b1530;
+      color: #f8fafc;
+    }
+
+    header {
+      text-align: center;
+      margin: 25px auto 40px;
+    }
+
+    header h1 {
+      color: #38bdf8;
+      font-size: 42px;
+      margin-bottom: 12px;
+    }
+
+    header p {
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    .features {
+      max-width: 950px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .feature {
+      display: block;
+      background: #1e2c46;
+      padding: 25px;
+      border-radius: 14px;
+      color: #f8fafc;
+      text-decoration: none;
+      border: 1px solid #334155;
+      transition: 0.2s;
+    }
+
+    .feature:hover {
+      transform: translateY(-4px);
+      border-color: #38bdf8;
+      background: #263954;
+    }
+
+    .feature h2 {
+      color: #7dd3fc;
+      font-size: 21px;
+      margin-top: 0;
+    }
+
+    .feature p {
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 0;
+    }
+
+    .main-feature {
+      grid-column: 1 / -1;
+      border-color: #38bdf8;
+    }
+
+    footer {
+      text-align: center;
+      color: #94a3b8;
+      margin-top: 40px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+      .features { grid-template-columns: 1fr; }
+      .main-feature { grid-column: auto; }
+      header h1 { font-size: 32px; }
+    }
+  </style>
 </head>
+
 <body>
-  <header class="topbar">
-    <div class="brand-mark">OL</div>
-    <div><h1>OlympicLens</h1><p>Smart Olympic Analytics & Prediction</p></div>
-    <span class="demo-badge">MVP DEMO DATA</span>
+  <header>
+    <h1>🏅 OlympicLens</h1>
+    <h2>See the story behind the medals.</h2>
+    <p>Explore Olympic performance, compare countries, and discover trends across Games.</p>
+    <p>Choose a feature to get started.</p>
   </header>
 
-  <main class="container">
-    <section class="hero">
-      <div>
-        <p class="eyebrow">DATA • DISCOVER • PREDICT</p>
-        <h2>See the story behind the medals.</h2>
-        <p>Explore Olympic performance, compare countries, and discover trends across Games.</p>
-      </div>
-    </section>
+  <main class="features">
 
-    <section class="filters panel">
-      <label>Olympic year
-        <select id="yearFilter">
-          <option value="all">All years</option>
-          <option value="2008">2008</option>
-          <option value="2012">2012</option>
-          <option value="2016">2016</option>
-          <option value="2020">2020</option>
-          <option value="2024">2024</option>
-        </select>
-      </label>
-      <label>Country
-        <select id="countryFilter">
-          <option value="all">All countries</option>
-          <option>United States</option><option>China</option><option>Great Britain</option>
-          <option>Japan</option><option>India</option>
-        </select>
-      </label>
-      <label>Sport
-        <select id="sportFilter">
-          <option value="all">All sports</option>
-          <option>Athletics</option><option>Swimming</option><option>Gymnastics</option>
-          <option>Wrestling</option><option>Badminton</option>
-        </select>
-      </label>
-      <button id="resetBtn" class="secondary">Reset filters</button>
-    </section>
+    <a class="feature main-feature" href="dashboard.html">
+      <h2>📊 Charts & Medal Summary</h2>
+      <p>View medal totals, country comparisons, performance charts and trends.</p>
+    </a>
 
+    <a class="feature" href="compare.html">
+      <h2>⚔️ Compare Countries</h2>
+      <p>Compare medal records between two countries.</p>
+    </a>
 
-    <section class="stats-grid">
-      <article class="stat-card"><span>Gold medals</span><strong id="goldKpi">—</strong><small>    Current selection</small></article>
-      <article class="stat-card"><span>Silver medals</span><strong id="silverKpi">—</strong><small>   Current selection</small></article>
-      <article class="stat-card"><span>Bronze medals</span><strong id="bronzeKpi">—</strong><small>   Current selection</small></article>
-      <article class="stat-card accent"><span>Total medals</span><strong id="totalKpi">—</strong><small>   Current selection</small></article>
-    </section>
+    <a class="feature" href="timeline.html">
+      <h2>🏛️ Olympic History</h2>
+      <p>Explore Olympic editions by year and season.</p>
+    </a>
 
-    <section class="chart-grid">
-      <article class="panel chart-panel"><div class="panel-heading"><div><h3>Country comparison</h3><p>Total medals by country</p></div></div><canvas id="countryChart"></canvas></article>
-      <article class="panel chart-panel"><div class="panel-heading"><div><h3>Performance over time</h3><p>Medals across Olympic editions</p></div></div><canvas id="trendChart"></canvas></article>
-      <article class="panel chart-panel"><div class="panel-heading"><div><h3>Sport-wise performance</h3><p>Medals by sport</p></div></div><canvas id="sportChart"></canvas></article>
-      <article class="panel chart-panel prediction"><div class="panel-heading"><div><h3>Next Games estimate</h3><p>Simple baseline forecast</p></div><span class="tag">DEMO</span></div>
-        <div id="predictionList" class="prediction-list"></div>
-        <p class="small-note">.</p>
-      </article>
-    </section>
+    <a class="feature" href="quiz.html">
+      <h2>🧠 Olympic Quiz</h2>
+      <p>Test your Olympic knowledge and check your score.</p>
+    </a>
 
-    <section class="panel table-panel">
-      <div class="panel-heading"><div><h3>Medal summary</h3><p>Numbers update when filters change</p></div></div>
-      <div class="table-wrap"><table><thead><tr><th>Country</th><th>Gold</th><th>Silver</th><th>Bronze</th><th>Total</th></tr></thead><tbody id="medalTable"></tbody></table></div>
-    </section>
-    <footer>OlympicLens • CodeFest 2026 • Student project prototype</footer>
+    <a class="feature" href="simulator.html">
+      <h2>🧪 Medal Simulator</h2>
+      <p>Select countries and experiment with hypothetical medal counts.</p>
+    </a>
+
   </main>
-  <script src="app.js"></script>
+
+  <footer>
+    OlympicLens — Smart Olympic Analytics and Prediction Platform
+  </footer>
 </body>
 </html>
- 
